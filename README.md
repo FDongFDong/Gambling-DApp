@@ -1,3 +1,5 @@
+
+# Gambling-DApp
 # 목차
 
 - [학습 목적](#학습-목적)
@@ -24,7 +26,6 @@
   - [배포(Remix)](#commitreveallottery-contract-배포remix)
   - [실행](#commitreveallottery-contract-실행)
 
-# Gambling-DApp
 
 # 학습 목적
 
