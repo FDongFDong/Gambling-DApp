@@ -1,5 +1,29 @@
 # 목차
+
 - [학습 목적](#학습-목적)
+- [특징](#특징)
+- [이점](#이점)
+- [Lottery Contract](#lottery-contract)
+  - [변수](#lottery-contract-변수)
+  - [생성자](#lottery-contract-생성자)
+  - [modifier](#lottery-contract-modifier)
+  - [함수](#lottery-contract-함수)
+  - [랜덤한 값을 뽑아주는 함수](#랜덤한-값을-뽑아주는-함수)
+  - [Lottery Contract 전체코드](#lottery-contract-전체-코드)
+  - [배포](#lottery-contract-배포---remix)
+  - [실행(시나리오)](#lottery-contract-실행시나리오)
+- [Re-entracy Attack](#re-entrancy-attack)
+  - [이더 전송 구문 비교](#이더-전송-구문-비교)
+  - [fallback() & receive()](#fallback--receive)
+  - [Re-entrancy Attack](#re-entrancy-attack)
+- [Commit & Reveal 패턴](#commit--reveal-패턴)
+- [CommitRevealLottery Contract](#commitreveallottery-contract)
+  - [변수](#commitreveallottery-contract-변수)
+  - [생성자](#commitreveallottery-contract-생성자)
+  - [CommitRevealLottery Contract 전체코드](#commitreveallottery--전체-코드)
+  - [배포(Remix)](#commitreveallottery-contract-배포remix)
+  - [실행](#commitreveallottery-contract-실행)
+
 # Gambling-DApp
 
 # 학습 목적
@@ -32,9 +56,9 @@
 - 익명성
   - 이름, 이메일등 x
 
-# Lottery 컨트랙트
+# Lottery Contract
 
-## 변수
+## Lottery Contract 변수
 
 ```solidity
 address public owner;
@@ -57,7 +81,7 @@ mapping(uint256 => address) public lotteryHistory;
   - 처음 lotteryId는 0번이 된다.
   - 해당 lotteryId에 대해 어떤 주소가 Winner였는지 기록해주기 위한 변수
 
-## 생성자
+## Lottery Contract 생성자
 
 ```solidity
 constructor(){
@@ -67,7 +91,7 @@ constructor(){
 
 - 해당 컨트랙트를 배포하는 사람이 owner이 된다.
 
-## modifier
+## Lottery Contract modifier
 
 ```solidity
 modifier onlyOwner {
@@ -78,7 +102,7 @@ modifier onlyOwner {
 
 - 해당 함수를 호출한 쪽이 Owner인지 확인한다.
 
-## 함수
+## Lottery Contract 함수
 
 ### getBalance() :  해당 컨트랙트가 가지고 있는 총 ETH balance의 양을 반환한다
 
@@ -287,7 +311,7 @@ contract Lottery {
 }
 ```
 
-## 배포 - Remix
+## Lottery Contract 배포 - Remix
 
 ```solidity
 [vm]from: 0x5B3...eddC4to: Lottery.(constructor)value: 0 weidata: 0x608...10033logs: 0hash: 0x729...4881f
@@ -305,7 +329,7 @@ logs []
 val 0 wei
 ```
 
-## 실행(시나리오)
+## Lottery Contract 실행(시나리오)
 
 1. 0x5B3..가 배포한다(배포자 == Onwer)
     - getBalance : 컨트랙트에 입력된 총 잔액을 가져온다
@@ -490,9 +514,9 @@ val 0 wei
 - commit 기간이 끝나면, 공개(reveal) 기간 동안 secret 값을 공개하며, 공개된 secret 값을 통해 seed 값이 계속 업데이트된다.
 - 공개 기간이 끝나면 seed 값이 완성되는데 이는 안전한 랜덤값이다.
 
-# CommitRevealLottery 컨트랙트
+# CommitRevealLottery Contract
 
-## 변수
+## CommitRevealLottery Contract 변수
 
 ```solidity
 uint256 public commitCloses;
@@ -530,7 +554,7 @@ mapping (address => bytes32) public commitments;
 
 - 참여자가 제시한 commit 값
 
-## 생성자
+## CommitRevealLottery Contract 생성자
 
 ```solidity
 constructor() {
@@ -543,7 +567,7 @@ constructor() {
   - commitCloses : 이번 블록 부터 4개의 블록이 생성된 뒤에 commit을 close하기 위함
   - revealCloses : commitCloses 블록부터 4개 뒤에 생성된 값
 
-## 함수
+## CommitRevealLottery Contract 함수
 
 ### enter() : 참여자가 secret 값을 생성한 후  0.01 이상의 ETH와 함께 commit 값을 등록
 
@@ -744,7 +768,7 @@ contract CommitRevealLottery{
 }
 ```
 
-## 배포(Remix)
+## CommitRevealLottery Contract 배포(Remix)
 
 ```solidity
 [vm]from: 0x5B3...eddC4to: CommitRevealLottery.(constructor)value: 0 weidata: 0x608...10033logs: 0hash: 0x84a...2a00f
@@ -762,7 +786,7 @@ logs []
 val 0 wei
 ```
 
-## 실행
+## CommitRevealLottery Contract 실행
 
 ### 초기값 확인
 
