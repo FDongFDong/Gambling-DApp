@@ -102,4 +102,154 @@ contract('Lottery', (accounts) => {
       ]);
     });
   });
+  describe('FickWinner', () => {
+    it('should revert pickWinner is called by not owner', async () => {
+      // owner: accounts[0]
+      await truffleAssert.reverts(lottery.pickWinner({ from: accounts[1] }));
+    });
+    it('PickWinner', async () => {
+      console.log('>>> before pickWinner');
+
+      // player들의 ETH Balance를 체크한다.
+      const account1ETHBalance_before = await web3.eth.getBalance(accounts[1]);
+      console.log(`account1's ETH balance ${account1ETHBalance_before}`);
+      console.log(
+        `account1's ETH balance to ether: ${
+          account1ETHBalance_before / 10 ** 18
+        }`
+      );
+      const account2ETHBalance_before = await web3.eth.getBalance(accounts[2]);
+      console.log(`account2's ETH balance ${account2ETHBalance_before}`);
+      console.log(
+        `account2's ETH balance to ether: ${
+          account2ETHBalance_before / 10 ** 18
+        }`
+      );
+      const account3ETHBalance_before = await web3.eth.getBalance(accounts[3]);
+      console.log(`account3's ETH balance ${account3ETHBalance_before}`);
+      console.log(
+        `account3's ETH balance to ether: ${
+          account3ETHBalance_before / 10 ** 18
+        }`
+      );
+      const account4ETHBalance_before = await web3.eth.getBalance(accounts[4]);
+      console.log(`account4's ETH balance ${account4ETHBalance_before}`);
+      console.log(
+        `account4's ETH balance to ether: ${
+          account4ETHBalance_before / 10 ** 18
+        }`
+      );
+      const account5ETHBalance_before = await web3.eth.getBalance(accounts[5]);
+      console.log(`account5's ETH balance ${account5ETHBalance_before}`);
+      console.log(
+        `account5's ETH balance to ether: ${
+          account5ETHBalance_before / 10 ** 18
+        }`
+      );
+
+      console.log('>>> pickWinner');
+      await lottery.pickWinner();
+      console.log('>>> after pickWinner');
+      const lotteryId = await lottery.lotteryId();
+      console.log(`lotteryId: ${lotteryId}`);
+      assert.equal(lotteryId, 1);
+
+      const winner = await lottery.lotteryHistory(lotteryId - 1);
+      console.log(`winner at lotteryId ${lotteryId - 1}: ${winner}`);
+
+      const account1ETHBalance_after = await web3.eth.getBalance(accounts[1]);
+      console.log(`account1's ETH balance ${account1ETHBalance_after}`);
+      console.log(
+        `account1's ETH balance to ether: ${
+          account1ETHBalance_after / 10 ** 18
+        }`
+      );
+      const account2ETHBalance_after = await web3.eth.getBalance(accounts[2]);
+      console.log(`account2's ETH balance ${account2ETHBalance_after}`);
+      console.log(
+        `account2's ETH balance to ether: ${
+          account2ETHBalance_after / 10 ** 18
+        }`
+      );
+      const account3ETHBalance_after = await web3.eth.getBalance(accounts[3]);
+      console.log(`account3's ETH balance ${account3ETHBalance_after}`);
+      console.log(
+        `account3's ETH balance to ether: ${
+          account3ETHBalance_after / 10 ** 18
+        }`
+      );
+      const account4ETHBalance_after = await web3.eth.getBalance(accounts[4]);
+      console.log(`account4's ETH balance ${account4ETHBalance_after}`);
+      console.log(
+        `account4's ETH balance to ether: ${
+          account4ETHBalance_after / 10 ** 18
+        }`
+      );
+      const account5ETHBalance_after = await web3.eth.getBalance(accounts[5]);
+      console.log(`account5's ETH balance ${account5ETHBalance_after}`);
+      console.log(
+        `account5's ETH balance to ether: ${
+          account5ETHBalance_after / 10 ** 18
+        }`
+      );
+      console.log(
+        `account balance difference: ${web3.utils
+          .toBN(account1ETHBalance_after)
+          .sub(web3.utils.toBN(account1ETHBalance_before))}`
+      );
+      console.log(
+        `account balance difference: ${web3.utils
+          .toBN(account2ETHBalance_after)
+          .sub(web3.utils.toBN(account2ETHBalance_before))}`
+      );
+      console.log(
+        `account balance difference: ${web3.utils
+          .toBN(account3ETHBalance_after)
+          .sub(web3.utils.toBN(account3ETHBalance_before))}`
+      );
+      console.log(
+        `account balance difference: ${web3.utils
+          .toBN(account4ETHBalance_after)
+          .sub(web3.utils.toBN(account4ETHBalance_before))}`
+      );
+      console.log(
+        `account balance difference: ${web3.utils
+          .toBN(account5ETHBalance_after)
+          .sub(web3.utils.toBN(account5ETHBalance_before))}`
+      );
+    });
+    it('Calculate winner - getRandomNumber', async () => {
+      const lotteryId = await lottery.lotteryId();
+      const winner = await lottery.lotteryHistory(lotteryId - 1);
+      console.log(`winner: ${winner}`);
+      const randomNumber = await lottery.getRandomNumber();
+      console.log(`randomNumber: ${randomNumber}`);
+      // block timestamp 읽어오기
+      const blockNumber = await web3.eth.getBlockNumber();
+      console.log(`block number: ${blockNumber}`);
+      const currentBlock = await web3.eth.getBlock(blockNumber);
+      console.log('current block : ', currentBlock);
+      // uint256(keccak256(abi.encodePacked(owner, block.timestamp))); 처럼 만들어주기
+      const calculatedRandomNumber = web3.utils
+        .toBN(
+          web3.utils.keccak256(
+            web3.utils.encodePacked(
+              {
+                value: await lottery.owner(),
+                type: 'address',
+              },
+              { value: currentBlock.timestamp, type: 'uint256' }
+            )
+          )
+        )
+        .toString();
+      console.log(`calculated random number: ${calculatedRandomNumber}`);
+      const calculateWinnerIndex = web3.utils
+        .toBN(calculatedRandomNumber)
+        .mod(web3.utils.toBN(5))
+        .toString();
+      console.log(`calculated winner index: ${calculateWinnerIndex}`);
+      assert.equal(winner, accounts[Number(calculateWinnerIndex) + 1]);
+    });
+  });
 });
