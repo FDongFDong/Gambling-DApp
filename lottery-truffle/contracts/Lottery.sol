@@ -58,7 +58,7 @@ contract Lottery {
   // pickWinner()는 아무나 호출하면 안되기에 modifier로 onlyOwner만 호출할 수 있도록 설정하였다.
   function pickWinner() public onlyOwner{
     // 랜덤값을 참여한 players들의 수로 나눈 나머지 -> 참여한 players 중에 랜덤하게 뽑는다는 의미
-    uint256 index = getRandomNumber() % players.length;
+    uint256 index = getRandomNumberV3() % players.length;
 
     lotteryHistory[lotteryId] = players[index];
     lotteryId++;

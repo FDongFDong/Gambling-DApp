@@ -102,7 +102,7 @@ contract('Lottery', (accounts) => {
       ]);
     });
   });
-  describe('FickWinner', () => {
+  describe('PickWinner', () => {
     it('should revert pickWinner is called by not owner', async () => {
       // owner: accounts[0]
       await truffleAssert.reverts(lottery.pickWinner({ from: accounts[1] }));
@@ -218,7 +218,7 @@ contract('Lottery', (accounts) => {
           .sub(web3.utils.toBN(account5ETHBalance_before))}`
       );
     });
-    it('Calculate winner - getRandomNumber', async () => {
+    it.skip('Calculate winner - getRandomNumber', async () => {
       const lotteryId = await lottery.lotteryId();
       const winner = await lottery.lotteryHistory(lotteryId - 1);
       console.log(`winner: ${winner}`);
@@ -244,6 +244,87 @@ contract('Lottery', (accounts) => {
         )
         .toString();
       console.log(`calculated random number: ${calculatedRandomNumber}`);
+      assert.equal(randomNumber, calculatedRandomNumber);
+      const calculateWinnerIndex = web3.utils
+        .toBN(calculatedRandomNumber)
+        .mod(web3.utils.toBN(5))
+        .toString();
+      console.log(`calculated winner index: ${calculateWinnerIndex}`);
+      assert.equal(winner, accounts[Number(calculateWinnerIndex) + 1]);
+    });
+    it.skip('Calculate winner - getRandomNumberV2', async () => {
+      const lotteryId = await lottery.lotteryId();
+
+      const winner = await lottery.lotteryHistory(lotteryId - 1);
+      console.log(`winner: ${winner}`);
+
+      // block timestamp 읽어오기
+      const blockNumber = await web3.eth.getBlockNumber();
+      console.log(`block number: ${blockNumber}`);
+
+      const currentBlock = await web3.eth.getBlock(blockNumber);
+      console.log('current block : ', currentBlock);
+
+      const calculatedRandomNumber = web3.utils
+        .toBN(
+          web3.utils.keccak256(
+            web3.utils.encodePacked(
+              {
+                value: currentBlock.difficulty,
+                type: 'uint256',
+              },
+              { value: currentBlock.timestamp, type: 'uint256' },
+              {
+                value: [
+                  accounts[1],
+                  accounts[2],
+                  accounts[3],
+                  accounts[4],
+                  accounts[5],
+                ],
+                type: 'address[]',
+              }
+            )
+          )
+        )
+        .toString();
+      console.log(`calculated random number: ${calculatedRandomNumber}`);
+      const calculateWinnerIndex = web3.utils
+        .toBN(calculatedRandomNumber)
+        .mod(web3.utils.toBN(5))
+        .toString();
+      console.log(`calculated winner index: ${calculateWinnerIndex}`);
+
+      assert.equal(winner, accounts[Number(calculateWinnerIndex) + 1]);
+    });
+    it('Calculate winner - getRandomNumberV3', async () => {
+      const lotteryId = await lottery.lotteryId();
+      const winner = await lottery.lotteryHistory(lotteryId - 1);
+      console.log(`winner: ${winner}`);
+
+      const randomNumber = await lottery.getRandomNumberV3();
+      console.log(`randomNumber: ${randomNumber}`);
+
+      const blockNumber = await web3.eth.getBlockNumber();
+      console.log(`block number: ${blockNumber}`);
+      const currentBlock = await web3.eth.getBlock(blockNumber);
+      console.log('current block : ', currentBlock);
+      // uint256(keccak256(abi.encodePacked(owner, block.timestamp))); 처럼 만들어주기
+      const calculatedRandomNumber = web3.utils
+        .toBN(
+          web3.utils.keccak256(
+            web3.utils.encodePacked(
+              {
+                value: currentBlock.parentHash,
+                type: 'bytes32',
+              },
+              { value: currentBlock.timestamp, type: 'uint256' }
+            )
+          )
+        )
+        .toString();
+      console.log(`calculated random number: ${calculatedRandomNumber}`);
+      assert.equal(randomNumber, calculatedRandomNumber);
       const calculateWinnerIndex = web3.utils
         .toBN(calculatedRandomNumber)
         .mod(web3.utils.toBN(5))
